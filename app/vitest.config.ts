@@ -53,6 +53,7 @@ const coverageConfig: CustomCoverageConfig = {
 };
 
 export default defineConfig({
+  base: '/drydock/',
   test: {
     globals: true,
     environment: 'node',
