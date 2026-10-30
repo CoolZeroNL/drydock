@@ -50,6 +50,7 @@ export const navigateFallbackAllowlist: RegExp[] = Object.values(ROUTES).map(
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/drydock/',
   plugins: [
     vue({
       template: {
