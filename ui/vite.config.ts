@@ -60,9 +60,33 @@ export function buildSpaNavigateFallbackPattern(routePath: string): RegExp {
   return new RegExp(`^${pathPattern}(?:\\?.*)?$`);
 }
 
-export const navigateFallbackAllowlist: RegExp[] = Object.values(ROUTES).map(
-  buildSpaNavigateFallbackPattern,
-);
+// export const navigateFallbackAllowlist: RegExp[] = Object.values(ROUTES).map(
+//   buildSpaNavigateFallbackPattern,
+// );
+
+export function buildSpaNavigateFallbackPattern(routePath: string): RegExp {
+  const segments = routePath.split('/').filter((segment) => segment.length > 0);
+  const body = segments
+    .map((segment) =>
+      segment.startsWith(':') ? '[^/?]+' : segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+    )
+    .join('\\/');
+
+  const escapedBase = BASE_PATH.replace(/^\/|\/$/g, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const fullBody = escapedBase ? `${escapedBase}\\/${body}` : body;
+    
+  let pathPattern = segments.length > 0 || escapedBase ? `\\/${fullBody}\\/?` : '\\/';
+  
+  // CRITICAL FIX: If it's the root dashboard route, ensure it doesn't grab sub-folders like assets/
+  if (routePath === '/') {
+    pathPattern = `\\/${escapedBase}\\/?`;
+    // Match exactly the root path or root path with query parameters, NOTHING deeper
+    return new RegExp(`^${pathPattern}(?:\\?.*)?$`);
+  }
+  
+  return new RegExp(`^${pathPattern}(?:\\?.*)?$`);
+}
+
 
 // https://vitejs.dev/config/
 export default defineConfig({
