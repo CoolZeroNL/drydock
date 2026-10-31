@@ -91,6 +91,11 @@ export default defineConfig({
         // Matches --dd-bg from the One Dark default theme (src/theme/tokens.css).
         theme_color: '#282c34',
         background_color: '#282c34',
+        
+        // SUB-PATH DEPLOYMENTS:
+        start_url: BASE_PATH,
+        scope: BASE_PATH,
+        
         icons: [
           {
             src: '/web-app-manifest-192x192.png',
