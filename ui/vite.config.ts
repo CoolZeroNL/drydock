@@ -5,12 +5,21 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { ROUTES } from './src/router/routes';
 
+const BASE_PATH = '/drydock/';
+// const BASE_PATH = '/';
+
 // workbox-routing tests a RegExpRoute's urlPattern against the FULL url.href
 // (which always starts with "http://" or "https://"), never against the
 // pathname alone — so a `^`-anchored pathname regex like /^\/api\// can never
 // match and silently falls through to the next route. Use a match callback
 // against url.pathname instead so this rule actually engages.
-export const isApiRequest = ({ url }: { url: URL }): boolean => url.pathname.startsWith('/api/');
+
+//export const isApiRequest = ({ url }: { url: URL }): boolean => url.pathname.startsWith('/api/');
+
+// UPDATED: Now looks for the API path relative to the basepath.
+export const isApiRequest = ({ url }: { url: URL }): boolean => 
+  url.pathname.startsWith(`${BASE_PATH}api/`) || url.pathname.startsWith('/api/');
+
 
 // DR-102: the service worker's navigation fallback used to be a denylist
 // (navigateFallbackDenylist: [/^\/api\//]) — a hand-maintained list that has to be
@@ -40,7 +49,14 @@ export function buildSpaNavigateFallbackPattern(routePath: string): RegExp {
       segment.startsWith(':') ? '[^/?]+' : segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
     )
     .join('\\/');
-  const pathPattern = segments.length > 0 ? `\\/${body}\\/?` : '\\/';
+
+  // Escape the base path (removing trailing slash for segment joining)
+  const escapedBase = BASE_PATH.replace(/^\/|\/$/g, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const fullBody = escapedBase ? `${escapedBase}\\/${body}` : body;
+    
+  // const pathPattern = segments.length > 0 ? `\\/${body}\\/?` : '\\/';
+  const pathPattern = segments.length > 0 || escapedBase ? `\\/${fullBody}\\/?` : '\\/';
+  
   return new RegExp(`^${pathPattern}(?:\\?.*)?$`);
 }
 
@@ -50,7 +66,7 @@ export const navigateFallbackAllowlist: RegExp[] = Object.values(ROUTES).map(
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/drydock/',
+  base: BASE_PATH,
   plugins: [
     vue({
       template: {
@@ -139,13 +155,17 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 8080,
     proxy: {
-      '^/api': {
+      // '^/api': {
+       [`^${BASE_PATH}api`]: {
         target: 'http://localhost:3333',
         changeOrigin: true,
+        rewrite: (path) => path.replace(new RegExp(`^${BASE_PATH}`), '/'),
       },
-      '^/auth': {
+      // '^/auth': {
+      [`^${BASE_PATH}auth`]: {
         target: 'http://localhost:3333',
         changeOrigin: true,
+        rewrite: (path) => path.replace(new RegExp(`^${BASE_PATH}`), '/'),
       },
     },
   },
