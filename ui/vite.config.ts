@@ -57,6 +57,7 @@ export function buildSpaNavigateFallbackPattern(routePath: string): RegExp {
     
   // const pathPattern = segments.length > 0 ? `\\/${body}\\/?` : '\\/';
   const pathPattern = segments.length > 0 || escapedBase ? `\\/${fullBody}\\/?` : '\\/';
+  console.log(pathPattern);
   
   return new RegExp(`^${pathPattern}(?:\\?.*)?$`);
 }
