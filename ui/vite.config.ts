@@ -42,27 +42,24 @@ export const isApiRequest = ({ url }: { url: URL }): boolean =>
 // NavigationRoute's own doc comment), so the trailing slash and any query string used
 // by the views (see the query param conventions documented in routes.ts) are both
 // optional.
-export function buildSpaNavigateFallbackPattern(routePath: string): RegExp {
-  const segments = routePath.split('/').filter((segment) => segment.length > 0);
-  const body = segments
-    .map((segment) =>
-      segment.startsWith(':') ? '[^/?]+' : segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
-    )
-    .join('\\/');
+// export function buildSpaNavigateFallbackPattern(routePath: string): RegExp {
+//   const segments = routePath.split('/').filter((segment) => segment.length > 0);
+//   const body = segments
+//     .map((segment) =>
+//       segment.startsWith(':') ? '[^/?]+' : segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+//     )
+//     .join('\\/');
 
-  // Escape the base path (removing trailing slash for segment joining)
-  const escapedBase = BASE_PATH.replace(/^\/|\/$/g, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const fullBody = escapedBase ? `${escapedBase}\\/${body}` : body;
+//   // Escape the base path (removing trailing slash for segment joining)
+//   const escapedBase = BASE_PATH.replace(/^\/|\/$/g, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+//   const fullBody = escapedBase ? `${escapedBase}\\/${body}` : body;
     
-  // const pathPattern = segments.length > 0 ? `\\/${body}\\/?` : '\\/';
-  const pathPattern = segments.length > 0 || escapedBase ? `\\/${fullBody}\\/?` : '\\/';
+//   // const pathPattern = segments.length > 0 ? `\\/${body}\\/?` : '\\/';
+//   const pathPattern = segments.length > 0 || escapedBase ? `\\/${fullBody}\\/?` : '\\/';
   
-  return new RegExp(`^${pathPattern}(?:\\?.*)?$`);
-}
+//   return new RegExp(`^${pathPattern}(?:\\?.*)?$`);
+// }
 
-// export const navigateFallbackAllowlist: RegExp[] = Object.values(ROUTES).map(
-//   buildSpaNavigateFallbackPattern,
-// );
 
 export function buildSpaNavigateFallbackPattern(routePath: string): RegExp {
   const segments = routePath.split('/').filter((segment) => segment.length > 0);
@@ -86,6 +83,11 @@ export function buildSpaNavigateFallbackPattern(routePath: string): RegExp {
   
   return new RegExp(`^${pathPattern}(?:\\?.*)?$`);
 }
+
+export const navigateFallbackAllowlist: RegExp[] = Object.values(ROUTES).map(
+  buildSpaNavigateFallbackPattern,
+);
+
 
 
 // https://vitejs.dev/config/
